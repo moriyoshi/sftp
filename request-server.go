@@ -101,9 +101,14 @@ func (rs *RequestServer) closeRequest(handle string) error {
 // Close the read/write/closer to trigger exiting the main server loop
 func (rs *RequestServer) Close() error { return rs.conn.Close() }
 
-// Serve requests for user session
+// Serve requests for user session, with the default background context
 func (rs *RequestServer) Serve() error {
-	ctx, cancel := context.WithCancel(context.Background())
+	return rs.ServeWithContext(context.Background())
+}
+
+// ServeWithContext requests for user session
+func (rs *RequestServer) ServeWithContext(outerCtx context.Context) error {
+	ctx, cancel := context.WithCancel(outerCtx)
 	defer cancel()
 	var wg sync.WaitGroup
 	runWorker := func(ch requestChan) {
